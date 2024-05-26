@@ -61,7 +61,7 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
+            'driver' => 'tma-eloquent',
             'model' => App\Models\User::class,
         ],
 
