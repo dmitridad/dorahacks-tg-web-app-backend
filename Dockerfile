@@ -15,7 +15,7 @@ RUN composer install && \
     php artisan key:generate && \
     php artisan cache:clear && \
     php artisan config:clear && \
-    ./write_env.sh
+    bash ./write_env.sh
 
 CMD [ "php", "artisan", "serve", "--host=0.0.0.0", "--port=80" ]
 
