@@ -16,8 +16,6 @@ RUN composer install && \
     php artisan cache:clear && \
     php artisan config:clear
 
-RUN bash ./write_env.sh
-
 CMD [ "php", "artisan", "serve", "--host=0.0.0.0", "--port=80" ]
 
 EXPOSE 80
