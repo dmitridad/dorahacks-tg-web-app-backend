@@ -31,19 +31,19 @@ class AuthController extends Controller
         }
         // check required header
         if (!$authHeader = $request->header('Authorization')) {
-            return response('Authorization header required', 403);
+            return response(['error' => 'Authorization header required'], 403);
         }
 
         $position = strrpos($authHeader, 'tma ');
 
         // check required header data
         if ($position === false) {
-            return response('tma authorization type required', 403);
+            return response(['error' => 'tma authorization type required'], 403);
         }
 
         $tgInitDataString = substr($authHeader, $position + 4);
         if (!$tgInitDataString || !$this->isValidInitData($tgInitDataString)) {
-            return response('Invalid init data', 403);
+            return response(['error' => 'Invalid init data'], 403);
         }
 
         parse_str($tgInitDataString, $tgInitData);
