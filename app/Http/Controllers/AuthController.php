@@ -31,21 +31,24 @@ class AuthController extends Controller
         }
         // check required header
         if (!$authHeader = $request->header('Authorization')) {
-            return response()->noContent(403);
+            return response('Authorization header required', 403);
         }
 
         $position = strrpos($authHeader, 'tma ');
 
         // check required header data
         if ($position === false) {
-            return response()->noContent(403);
+            return response('tma authorization type required', 403);
         }
 
-        $tgInitData = substr($authHeader, $position + 4);
+        $tgInitDataString = substr($authHeader, $position + 4);
+        if (!$tgInitDataString || !$this->isValidInitData($tgInitDataString)) {
+            return response('Invalid init data', 403);
+        }
 
-        // TODO validate init data
-        // TODO temporary solution
-        $tgUserId = $tgInitData;
+        parse_str($tgInitDataString, $tgInitData);
+        $tgUserData = json_decode($tgInitData['user'], true);
+        $tgUserId = $tgUserData['id'];
 
         // attempt to authenticate the user
         if (Auth::attempt(['tg_user_id' => $tgUserId])) {
@@ -72,5 +75,34 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return response()->noContent();
+    }
+
+    protected function isValidInitData(string $initData): bool
+    {
+        [$checksum, $sortedInitData] = $this->convertInitData($initData);
+        $secretKey = hash_hmac('sha256', env('TG_BOT_TOKEN'), 'WebAppData', true);
+        $hash = bin2hex(hash_hmac('sha256', $sortedInitData, $secretKey, true));
+
+        return 0 === strcmp($hash, $checksum);
+    }
+
+    protected function convertInitData(string $initData): array
+    {
+        // TODO check auth date not expired
+        $initDataArray = explode('&', rawurldecode($initData));
+        $needle = 'hash=';
+        $hash = '';
+
+        foreach ($initDataArray as &$data) {
+            if (str_starts_with($data, $needle)) {
+                $hash = substr_replace($data, '', 0, \strlen($needle));
+                $data = null;
+            }
+        }
+
+        $initDataArray = array_filter($initDataArray);
+        sort($initDataArray);
+
+        return [$hash, implode("\n", $initDataArray)];
     }
 }
