@@ -10,8 +10,6 @@ WORKDIR /app
 COPY . /app
 
 RUN composer install && \
-    touch .env && \
-    echo "APP_KEY=${APP_KEY}" >> .env && \
     php artisan cache:clear && \
     php artisan config:clear
 
