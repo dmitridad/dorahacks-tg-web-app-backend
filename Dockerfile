@@ -14,7 +14,8 @@ RUN composer install && \
     echo "APP_KEY=$APP_KEY" >> .env && \
     php artisan key:generate && \
     php artisan cache:clear && \
-    php artisan config:clear
+    php artisan config:clear && \
+    ./write_env.sh
 
 CMD [ "php", "artisan", "serve", "--host=0.0.0.0", "--port=80" ]
 
