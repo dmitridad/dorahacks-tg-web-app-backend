@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->increments('user_id');
-            $table->unsignedInteger('tg_user_id')->unique();
-            $table->string('tg_first_name');
-            $table->string('tg_last_name')->nullable();
-            $table->string('tg_username')->nullable();
+        Schema::create('user_game_results', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('game_id');
+            $table->enum('game_result', ['win', 'loss', 'draw']);
             $table->timestamps();
+
+            $table->unique(['user_id', 'game_id']);
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('user_game_results');
     }
 };

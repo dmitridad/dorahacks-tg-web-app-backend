@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->increments('user_id');
-            $table->unsignedInteger('tg_user_id')->unique();
-            $table->string('tg_first_name');
-            $table->string('tg_last_name')->nullable();
-            $table->string('tg_username')->nullable();
+        Schema::create('rooms', function (Blueprint $table) {
+            $table->increments('room_id');
+            $table->string('room_name');
+            $table->unsignedSmallInteger('room_capacity')->default(2);
+            $table->enum('room_status', ['empty', 'not_empty', 'full', 'game_started'])->default('empty');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('rooms');
     }
 };

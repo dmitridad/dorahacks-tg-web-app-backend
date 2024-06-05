@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->increments('user_id');
-            $table->unsignedInteger('tg_user_id')->unique();
-            $table->string('tg_first_name');
-            $table->string('tg_last_name')->nullable();
-            $table->string('tg_username')->nullable();
+        Schema::create('room_users', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('room_id');
+            $table->unsignedInteger('user_id')->unique();
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('room_users');
     }
 };
