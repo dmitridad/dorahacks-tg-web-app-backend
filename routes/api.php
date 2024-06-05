@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,13 +14,29 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::prefix('auth')->group(function () {
+    Route::post('/', [AuthController::class, 'authenticate'])->name('auth');
+    Route::get('/csrf', [AuthController::class, 'getCsrfToken'])->name('auth.csrf');
+    Route::middleware(['auth:sanctum'])
+        ->get('/user', [AuthController::class, 'user'])
+        ->name('auth.user');
+});
 
-Route::get('/auth/csrf', [AuthController::class, 'getCsrfToken'])
-    ->name('auth.csrf');
-Route::post('/auth', [AuthController::class, 'authenticate'])
-    ->name('auth');
-Route::middleware('auth')->post('/logout', [AuthController::class, 'logout'])
+Route::middleware('auth')
+    ->post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-})->name('auth.user');
+
+Route::prefix('rooms')->group(function () {
+    Route::middleware(['auth:sanctum'])
+        ->get('/', [RoomController::class, 'index'])
+        ->name('rooms');
+    Route::middleware(['auth:sanctum'])
+        ->post('/{room_id}/join', [RoomController::class, 'join'])
+        ->name('rooms.join');
+    Route::middleware(['auth:sanctum'])
+        ->post('/leave', [RoomController::class, 'leave'])
+        ->name('rooms.leave');
+    Route::middleware(['auth:sanctum'])
+        ->post('/', [RoomController::class, 'store'])
+        ->name('rooms.store');
+});
