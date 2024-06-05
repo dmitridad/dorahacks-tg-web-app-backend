@@ -31,19 +31,19 @@ class AuthController extends Controller
         }
         // check required header
         if (!$authHeader = $request->header('Authorization')) {
-            return response(['error' => 'Authorization header required'], 403);
+            return response(['message' => 'Authorization header required'], 403);
         }
 
         $position = strrpos($authHeader, 'tma ');
 
         // check required header data
         if ($position === false) {
-            return response(['error' => 'tma authorization type required'], 403);
+            return response(['message' => 'tma authorization type required'], 403);
         }
 
         $tgInitDataString = substr($authHeader, $position + 4);
         if (!$tgInitDataString || !$this->isValidInitData($tgInitDataString)) {
-            return response(['error' => 'Invalid init data'], 403);
+            return response(['message' => 'Invalid init data'], 403);
         }
 
         parse_str($tgInitDataString, $tgInitData);
@@ -60,7 +60,10 @@ class AuthController extends Controller
         // register new user and authenticate
         /* @var User $user */
         $user = User::query()->create([
-            'tg_user_id' => $tgUserId,
+            User::PROP_TG_USER_ID => $tgUserId,
+            User::PROP_TG_FIRST_NAME => $tgUserData['first_name'],
+            User::PROP_TG_LAST_NAME => $tgUserData['last_name'] ?? null,
+            User::PROP_TG_USERNAME => $tgUserData['username'] ?? null,
         ]);
 
         Auth::login($user);
@@ -75,6 +78,11 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return response()->noContent();
+    }
+
+    public function user()
+    {
+        return Auth::user();
     }
 
     protected function isValidInitData(string $initData): bool
