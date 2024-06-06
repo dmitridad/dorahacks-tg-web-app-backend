@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Resources\RoomCollection;
+use App\Http\Resources\RoomResource;
 use App\Models\Room;
 use App\Models\RoomUser;
 use App\Models\User;
@@ -17,6 +18,13 @@ class RoomController extends Controller
     public function index()
     {
         return RoomCollection::make(Room::all());
+    }
+
+    public function show(int $roomId)
+    {
+        $room = Room::query()->findOrFail($roomId);
+
+        return RoomResource::make($room);
     }
 
     public function store(StoreRoomRequest $request)

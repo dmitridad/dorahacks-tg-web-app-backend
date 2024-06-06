@@ -29,7 +29,10 @@ Route::middleware('auth')
 Route::prefix('rooms')->group(function () {
     Route::middleware(['auth:sanctum'])
         ->get('/', [RoomController::class, 'index'])
-        ->name('rooms');
+        ->name('rooms.index');
+    Route::middleware(['auth:sanctum'])
+        ->get('/{room_id}', [RoomController::class, 'show'])
+        ->name('rooms.show');
     Route::middleware(['auth:sanctum'])
         ->post('/{room_id}/join', [RoomController::class, 'join'])
         ->name('rooms.join');
