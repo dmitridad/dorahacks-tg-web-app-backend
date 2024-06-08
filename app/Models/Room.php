@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GameStatus;
 use App\Enums\RoomStatus;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,4 +29,11 @@ class Room extends Model
     protected $casts = [
         self::PROP_ROOM_STATUS => RoomStatus::class,
     ];
+
+    public function activeGame()
+    {
+        return $this
+            ->hasOne(Game::class, Game::PROP_ROOM_ID, self::PROP_ROOM_ID)
+            ->where(Game::PROP_GAME_STATUS, '!=', GameStatus::Finished);
+    }
 }
