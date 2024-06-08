@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,4 +43,10 @@ Route::prefix('rooms')->group(function () {
     Route::middleware(['auth:sanctum'])
         ->post('/', [RoomController::class, 'store'])
         ->name('rooms.store');
+});
+
+Route::prefix('games')->group(function () {
+    Route::middleware(['auth:sanctum'])
+        ->post('/', [GameController::class, 'store'])
+        ->name('games.store');
 });

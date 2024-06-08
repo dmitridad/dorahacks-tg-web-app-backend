@@ -22,6 +22,7 @@ class RoomResource extends JsonResource
             'room_capacity' => $this->resource->room_capacity,
             'room_status' => $this->resource->room_status,
             'users_count' => RoomUser::usersCount($this->resource->room_id),
+            'game' => $this->resource->activeGame()->first(),
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
         ];
