@@ -3,81 +3,75 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
     public const STATUS_CHECKED = 'checked';
-    public const STATUS_AUTHENTICATED = 'authenticated';
     public const STATUS_REGISTERED = 'registered';
-
-    public function getCsrfToken(Request $request): Response|JsonResponse
-    {
-        if ($request->expectsJson()) {
-            return new JsonResponse(status: 204);
-        }
-
-        return new Response(status: 204);
-    }
+    public const STATUS_TOKEN_REGENERATED = 'regenerated';
 
     public function authenticate(Request $request)
     {
-        // check if the user has already been authenticated
-        if (Auth::check()) {
-            return response(['status' => self::STATUS_CHECKED]);
-        }
-        // check required header
-        if (!$authHeader = $request->header('Authorization')) {
-            return response(['message' => 'Authorization header required'], 403);
-        }
-
-        $position = strrpos($authHeader, 'tma ');
-
-        // check required header data
-        if ($position === false) {
-            return response(['message' => 'tma authorization type required'], 403);
-        }
-
-        $tgInitDataString = substr($authHeader, $position + 4);
-        if (!$tgInitDataString || !$this->isValidInitData($tgInitDataString)) {
-            return response(['message' => 'Invalid init data'], 403);
-        }
-
-        parse_str($tgInitDataString, $tgInitData);
+        $tgInitData = $request->attributes->get('tg_init_data');
         $tgUserData = json_decode($tgInitData['user'], true);
         $tgUserId = $tgUserData['id'];
 
-        // attempt to authenticate the user
-        if (Auth::attempt(['tg_user_id' => $tgUserId])) {
-            $request->session()->regenerate();
-
-            return response(['status' => self::STATUS_AUTHENTICATED]);
+        $user = User::fromTg($tgUserId)->first();
+        if ($user) {
+            return response(['status' => self::STATUS_CHECKED]);
         }
 
-        // register new user and authenticate
-        /* @var User $user */
-        $user = User::query()->create([
-            User::PROP_TG_USER_ID => $tgUserId,
-            User::PROP_TG_FIRST_NAME => $tgUserData['first_name'],
-            User::PROP_TG_LAST_NAME => $tgUserData['last_name'] ?? null,
-            User::PROP_TG_USERNAME => $tgUserData['username'] ?? null,
+        // register new user and create token
+        $token = DB::transaction(function () use ($tgUserData, $tgUserId){
+            $firstName = $tgUserData['first_name'];
+            $lastName = $tgUserData['last_name'] ?? null;
+
+            /* @var User $user */
+            $user = User::query()->create([
+                User::PROP_TG_USER_ID => $tgUserId,
+                User::PROP_TG_FIRST_NAME => $firstName,
+                User::PROP_TG_LAST_NAME => $lastName,
+                User::PROP_TG_USERNAME => $tgUserData['username'] ?? null,
+            ]);
+
+            return $user
+                ->createToken($this->generateTokenName($firstName, $lastName))
+                ->plainTextToken;
+        });
+
+        return response([
+            'status' => self::STATUS_REGISTERED,
+            'token' => $token,
         ]);
-
-        Auth::login($user);
-
-        return response(['status' => self::STATUS_REGISTERED]);
     }
 
-    public function logout(Request $request): Response
+    public function regenerateToken(Request $request)
     {
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $tgInitData = $request->attributes->get('tg_init_data');
+        $tgUserData = json_decode($tgInitData['user'], true);
+        $tgUserId = $tgUserData['id'];
 
-        return response()->noContent();
+        /* @var User $user */
+        $user = User::fromTg($tgUserId)->firstOrFail();
+        // delete the old token and create a new one
+        $token = DB::transaction(function () use ($tgUserData, $user){
+            $user->tokens()->delete();
+
+            $firstName = $tgUserData['first_name'];
+            $lastName = $tgUserData['last_name'] ?? null;
+
+            return $user
+                ->createToken($this->generateTokenName($firstName, $lastName))
+                ->plainTextToken;
+        });
+
+        return response([
+            'status' => self::STATUS_TOKEN_REGENERATED,
+            'token' => $token,
+        ]);
     }
 
     public function user()
@@ -85,32 +79,10 @@ class AuthController extends Controller
         return Auth::user();
     }
 
-    protected function isValidInitData(string $initData): bool
+    protected function generateTokenName(string $firstName, ?string $lastName): string
     {
-        [$checksum, $sortedInitData] = $this->convertInitData($initData);
-        $secretKey = hash_hmac('sha256', env('TG_BOT_TOKEN'), 'WebAppData', true);
-        $hash = bin2hex(hash_hmac('sha256', $sortedInitData, $secretKey, true));
+        $parts = array_filter([$firstName, $lastName, now()->timestamp]);
 
-        return 0 === strcmp($hash, $checksum);
-    }
-
-    protected function convertInitData(string $initData): array
-    {
-        // TODO check auth date not expired
-        $initDataArray = explode('&', rawurldecode($initData));
-        $needle = 'hash=';
-        $hash = '';
-
-        foreach ($initDataArray as &$data) {
-            if (str_starts_with($data, $needle)) {
-                $hash = substr_replace($data, '', 0, \strlen($needle));
-                $data = null;
-            }
-        }
-
-        $initDataArray = array_filter($initDataArray);
-        sort($initDataArray);
-
-        return [$hash, implode("\n", $initDataArray)];
+        return implode('_', $parts);
     }
 }

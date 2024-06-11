@@ -16,37 +16,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::prefix('auth')->group(function () {
-    Route::post('/', [AuthController::class, 'authenticate'])->name('auth');
-    Route::get('/csrf', [AuthController::class, 'getCsrfToken'])->name('auth.csrf');
+    Route::middleware(['validated.tg'])
+        ->post('/', [AuthController::class, 'authenticate'])
+        ->name('auth');
+
+    Route::middleware(['validated.tg'])
+        ->post('/regenerate-token', [AuthController::class, 'regenerateToken'])
+        ->name('auth.regenerate_token');
+
     Route::middleware(['auth:sanctum'])
         ->get('/user', [AuthController::class, 'user'])
         ->name('auth.user');
 });
 
-Route::middleware('auth')
-    ->post('/logout', [AuthController::class, 'logout'])
-    ->name('logout');
-
-Route::prefix('rooms')->group(function () {
-    Route::middleware(['auth:sanctum'])
-        ->get('/', [RoomController::class, 'index'])
-        ->name('rooms.index');
-    Route::middleware(['auth:sanctum'])
-        ->get('/{room_id}', [RoomController::class, 'show'])
-        ->name('rooms.show');
-    Route::middleware(['auth:sanctum'])
-        ->post('/{room_id}/join', [RoomController::class, 'join'])
-        ->name('rooms.join');
-    Route::middleware(['auth:sanctum'])
-        ->post('/leave', [RoomController::class, 'leave'])
-        ->name('rooms.leave');
-    Route::middleware(['auth:sanctum'])
-        ->post('/', [RoomController::class, 'store'])
-        ->name('rooms.store');
+Route::prefix('rooms')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('/', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/{room_id}', [RoomController::class, 'show'])->name('rooms.show');
+    Route::post('/{room_id}/join', [RoomController::class, 'join'])->name('rooms.join');
+    Route::post('/leave', [RoomController::class, 'leave'])->name('rooms.leave');
+    Route::post('/', [RoomController::class, 'store'])->name('rooms.store');
 });
 
 Route::prefix('games')->group(function () {
-    Route::middleware(['auth:sanctum'])
-        ->post('/', [GameController::class, 'store'])
-        ->name('games.store');
+    Route::post('/', [GameController::class, 'store'])->name('games.store');
+    Route::post('/{game_id}/generate-number', [GameController::class, 'generateNumber'])
+        ->name('games.generate_number');
 });
