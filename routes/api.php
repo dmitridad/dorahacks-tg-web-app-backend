@@ -37,7 +37,7 @@ Route::prefix('rooms')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/', [RoomController::class, 'store'])->name('rooms.store');
 });
 
-Route::prefix('games')->group(function () {
+Route::prefix('games')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/', [GameController::class, 'store'])->name('games.store');
     Route::post('/{game_id}/generate-number', [GameController::class, 'generateNumber'])
         ->name('games.generate_number');
