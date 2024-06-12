@@ -36,4 +36,12 @@ class Room extends Model
             ->hasOne(Game::class, Game::PROP_ROOM_ID, self::PROP_ROOM_ID)
             ->where(Game::PROP_GAME_STATUS, '!=', GameStatus::Finished);
     }
+
+    public function hasUser(User $user)
+    {
+        return RoomUser::query()
+            ->where(RoomUser::PROP_ROOM_ID, $this->room_id)
+            ->where(RoomUser::PROP_USER_ID, $user->user_id)
+            ->exists();
+    }
 }
