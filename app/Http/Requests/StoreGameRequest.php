@@ -10,6 +10,7 @@ class StoreGameRequest extends FormRequest
     {
         return [
             'room_id' => 'required|integer',
+            'ton_game_address' => 'required|string',
         ];
     }
 }

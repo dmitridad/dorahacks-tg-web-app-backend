@@ -12,6 +12,7 @@ class Game extends Model
     public const PROP_GAME_ID = 'game_id';
     public const PROP_ROOM_ID = 'room_id';
     public const PROP_GAME_STATUS = 'game_status';
+    public const PROP_TON_GAME_ADDRESS = 'ton_game_address';
     public const PROP_CREATED_AT = 'created_at';
     public const PROP_UPDATED_AT = 'updated_at';
 
@@ -21,6 +22,7 @@ class Game extends Model
     protected $fillable = [
         self::PROP_ROOM_ID,
         self::PROP_GAME_STATUS,
+        self::PROP_TON_GAME_ADDRESS,
     ];
 
     protected $casts = [

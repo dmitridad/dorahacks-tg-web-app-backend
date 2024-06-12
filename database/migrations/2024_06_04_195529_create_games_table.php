@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('game_id');
             $table->unsignedInteger('room_id');
             $table->enum('game_status', ['created', 'started', 'finished']);
+            $table->string('ton_game_address');
             $table->timestamps();
         });
     }
