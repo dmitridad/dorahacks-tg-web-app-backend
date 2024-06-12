@@ -42,3 +42,6 @@ Route::prefix('games')->group(function () {
     Route::post('/{game_id}/generate-number', [GameController::class, 'generateNumber'])
         ->name('games.generate_number');
 });
+
+// temporary endpoint for testing purposes
+Route::delete('/user', [AuthController::class, 'deleteUser'])->name('user.delete');

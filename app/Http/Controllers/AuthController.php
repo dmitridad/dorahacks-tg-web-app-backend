@@ -79,6 +79,17 @@ class AuthController extends Controller
         return Auth::user();
     }
 
+    public function deleteUser(Request $request)
+    {
+        $tgUserId = $request->input('tg_user_id');
+        /* @var User $user */
+        $user = User::fromTg($tgUserId)->firstOrFail();
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response(['status' => 'ok']);
+    }
+
     protected function generateTokenName(string $firstName, ?string $lastName): string
     {
         $parts = array_filter([$firstName, $lastName, now()->timestamp]);
