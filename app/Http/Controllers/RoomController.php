@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoomStatus;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Resources\RoomCollection;
 use App\Http\Resources\RoomResource;
 use App\Models\Room;
 use App\Models\RoomUser;
 use App\Models\User;
-use App\Services\RoomStatus;
+use App\Services\RoomStatusService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,14 +53,17 @@ class RoomController extends Controller
         if ($room->room_status->isClosed()) {
             return response(['message' => 'Room is closed to join'], Response::HTTP_FORBIDDEN);
         }
+        if ($room->room_status !== RoomStatus::Empty && $room->activeGame()->doesntExist()) {
+            return response(['message' => 'Game is not created, try again later'], Response::HTTP_CONFLICT);
+        }
 
         $roomUser = RoomUser::query()
             ->where(RoomUser::PROP_USER_ID, $user->user_id)
             ->first();
 
         if (!$roomUser) {
-            /* @var RoomStatus $roomStatus */
-            $roomStatus = app(RoomStatus::class);
+            /* @var RoomStatusService $roomStatus */
+            $roomStatus = app(RoomStatusService::class);
             DB::transaction(function () use ($room, $user, $roomStatus){
                 RoomUser::query()->create([
                     RoomUser::PROP_ROOM_ID => $room->room_id,
@@ -84,8 +88,8 @@ class RoomController extends Controller
         /* @var User $user */
         $user = Auth::user();
 
-        /* @var RoomStatus $roomStatus */
-        $roomStatus = app(RoomStatus::class);
+        /* @var RoomStatusService $roomStatus */
+        $roomStatus = app(RoomStatusService::class);
         $isDeleted = DB::transaction(function () use ($user, $roomStatus) {
             $room = $user->room()->first();
             if (!$room) {
