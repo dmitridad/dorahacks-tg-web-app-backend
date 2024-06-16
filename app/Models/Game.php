@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\GameStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Game extends Model
 {
@@ -13,6 +14,7 @@ class Game extends Model
     public const PROP_ROOM_ID = 'room_id';
     public const PROP_GAME_STATUS = 'game_status';
     public const PROP_TON_GAME_ADDRESS = 'ton_game_address';
+    public const PROP_GAME_CAPACITY = 'game_capacity';
     public const PROP_CREATED_AT = 'created_at';
     public const PROP_UPDATED_AT = 'updated_at';
 
@@ -23,9 +25,19 @@ class Game extends Model
         self::PROP_ROOM_ID,
         self::PROP_GAME_STATUS,
         self::PROP_TON_GAME_ADDRESS,
+        self::PROP_GAME_CAPACITY,
     ];
 
     protected $casts = [
         self::PROP_GAME_STATUS => GameStatus::class,
     ];
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(
+            Room::class,
+            self::PROP_ROOM_ID,
+            Room::PROP_ROOM_ID
+        );
+    }
 }
