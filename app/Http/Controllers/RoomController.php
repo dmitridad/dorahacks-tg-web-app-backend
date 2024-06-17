@@ -62,15 +62,13 @@ class RoomController extends Controller
             ->first();
 
         if (!$roomUser) {
-            /* @var RoomStatusService $roomStatus */
-            $roomStatus = app(RoomStatusService::class);
-            DB::transaction(function () use ($room, $user, $roomStatus){
+            DB::transaction(function () use ($room, $user){
                 RoomUser::query()->create([
                     RoomUser::PROP_ROOM_ID => $room->room_id,
                     RoomUser::PROP_USER_ID => $user->user_id,
                 ]);
 
-                $roomStatus->sync($room);
+                RoomStatusService::sync($room);
             });
 
             return response(['message' => 'User is joined to the room'], Response::HTTP_OK);
@@ -87,10 +85,7 @@ class RoomController extends Controller
     {
         /* @var User $user */
         $user = Auth::user();
-
-        /* @var RoomStatusService $roomStatus */
-        $roomStatus = app(RoomStatusService::class);
-        $isDeleted = DB::transaction(function () use ($user, $roomStatus) {
+        $isDeleted = DB::transaction(function () use ($user) {
             $room = $user->room()->first();
             if (!$room) {
                 return false;
@@ -99,7 +94,7 @@ class RoomController extends Controller
             RoomUser::query()
                 ->where(RoomUser::PROP_USER_ID, $user->user_id)
                 ->delete();
-            $roomStatus->sync($room);
+            RoomStatusService::sync($room);
 
             return true;
         });
