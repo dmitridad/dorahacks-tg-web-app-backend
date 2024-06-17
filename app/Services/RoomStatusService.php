@@ -21,7 +21,7 @@ class RoomStatusService
             $status = RoomStatus::NotEmpty;
         } elseif ($usersCount === $room->room_capacity) {
             $status = RoomStatus::Full;
-            if ($room->game->game_status === GameStatus::Started) {
+            if ($room->game?->game_status === GameStatus::Started) {
                 $status = RoomStatus::GameStarted;
             }
         }

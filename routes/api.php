@@ -40,6 +40,8 @@ Route::prefix('rooms')->middleware(['auth:sanctum'])->group(function () {
 Route::prefix('games')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/', [GameController::class, 'store'])->name('game.store');
     Route::post('/{game_id}/join', [GameController::class, 'join'])->name('game.join');
+    // TODO temporary solution for testing
+    Route::delete('/{game_id}/purge', [GameController::class, 'purge'])->name('game.purge');
     Route::get('/{game_id}/rounds', [GameController::class, 'getRounds'])->name('game.get_rounds');
     Route::post('/{game_id}/generate-number', [GameController::class, 'generateNumber'])
         ->name('game.generate_number');

@@ -9,8 +9,12 @@ use App\Exceptions\CustomRuntimeException;
 use App\Http\Requests\StoreGameRequest;
 use App\Http\Resources\GameRoundCollection;
 use App\Models\Game;
+use App\Models\GameRound;
+use App\Models\GameUser;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\GameService;
+use App\Services\RoomStatusService;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -54,6 +58,25 @@ class GameController extends Controller
         }
 
         return response(['message' => 'User is joined to the game'], Response::HTTP_OK);
+    }
+
+    // TODO temporary solution for testing
+    public function purge(int $gameId)
+    {
+        /* @var Game $game */
+        $game = Game::query()->findOrFail($gameId);
+
+        GameUser::query()->where(GameUser::PROP_GAME_ID, $game->game_id)->delete();
+        GameRound::query()->where(GameRound::PROP_GAME_ID, $game->game_id)->delete();
+
+        /* @var Room $room */
+        $room = $game->room;
+
+        $game->delete();
+
+        RoomStatusService::sync($room);
+
+        return response()->noContent();
     }
 
     public function getRounds(int $gameId)
