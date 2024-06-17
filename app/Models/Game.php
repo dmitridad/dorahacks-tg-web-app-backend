@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\GameStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Game extends Model
 {
@@ -38,6 +40,30 @@ class Game extends Model
             Room::class,
             self::PROP_ROOM_ID,
             Room::PROP_ROOM_ID
+        );
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            GameUser::TABLE_NAME,
+            self::PROP_GAME_ID,
+            User::PROP_USER_ID
+        );
+    }
+
+    public function usersCount(): int
+    {
+        return $this->users()->count();
+    }
+
+    public function rounds(): HasMany
+    {
+        return $this->hasMany(
+            GameRound::class,
+            self::PROP_GAME_ID,
+            GameRound::PROP_GAME_ID
         );
     }
 }

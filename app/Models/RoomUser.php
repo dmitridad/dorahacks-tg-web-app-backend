@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class RoomUser extends Model
@@ -22,9 +21,4 @@ class RoomUser extends Model
         self::PROP_ROOM_ID,
         self::PROP_USER_ID,
     ];
-
-    public function scopeUsersCount(Builder $query, int $roomId): int
-    {
-        return $query->where(self::PROP_ROOM_ID, $roomId)->count();
-    }
 }
