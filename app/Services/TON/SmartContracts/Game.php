@@ -22,6 +22,7 @@ class Game implements GameInterface
      */
     public function getLastNumber(): int
     {
+        // TODO try/catch and retries
         $response = $this->tonHttpGateway
             ->getTransport()
             ->runGetMethod($this->address, 'lastNumber');
