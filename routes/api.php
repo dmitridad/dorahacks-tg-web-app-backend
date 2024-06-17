@@ -31,16 +31,18 @@ Route::prefix('auth')->group(function () {
 
 Route::prefix('rooms')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', [RoomController::class, 'index'])->name('rooms.index');
-    Route::get('/{room_id}', [RoomController::class, 'show'])->name('rooms.show');
-    Route::post('/{room_id}/join', [RoomController::class, 'join'])->name('rooms.join');
-    Route::post('/leave', [RoomController::class, 'leave'])->name('rooms.leave');
-    Route::post('/', [RoomController::class, 'store'])->name('rooms.store');
+    Route::get('/{room_id}', [RoomController::class, 'show'])->name('room.show');
+    Route::post('/{room_id}/join', [RoomController::class, 'join'])->name('room.join');
+    Route::post('/leave', [RoomController::class, 'leave'])->name('room.leave');
+    Route::post('/', [RoomController::class, 'store'])->name('room.store');
 });
 
 Route::prefix('games')->middleware(['auth:sanctum'])->group(function () {
-    Route::post('/', [GameController::class, 'store'])->name('games.store');
+    Route::post('/', [GameController::class, 'store'])->name('game.store');
+    Route::post('/{game_id}/join', [GameController::class, 'join'])->name('game.join');
+    Route::get('/{game_id}/rounds', [GameController::class, 'getRounds'])->name('game.get_rounds');
     Route::post('/{game_id}/generate-number', [GameController::class, 'generateNumber'])
-        ->name('games.generate_number');
+        ->name('game.generate_number');
 });
 
 // temporary endpoint for testing purposes
