@@ -35,7 +35,7 @@ class Room extends Model
     public function activeGame(): HasOne
     {
         return $this
-            ->hasOne(Game::class, self::PROP_ROOM_ID, Game::PROP_ROOM_ID)
+            ->hasOne(Game::class, Game::PROP_ROOM_ID, self::PROP_ROOM_ID)
             ->where(Game::PROP_GAME_STATUS, '!=', GameStatus::Finished);
     }
 
@@ -49,7 +49,7 @@ class Room extends Model
 
     public function game(): HasOne
     {
-        return $this->hasOne(Game::class, self::PROP_ROOM_ID, Game::PROP_ROOM_ID);
+        return $this->hasOne(Game::class, Game::PROP_ROOM_ID, self::PROP_ROOM_ID);
     }
 
     public function users(): BelongsToMany
