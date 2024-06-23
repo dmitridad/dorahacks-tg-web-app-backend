@@ -3,11 +3,14 @@
 namespace App\Services\TON\SmartContracts;
 
 use App\Services\TON\TonHttpGatewayInterface;
+use App\Traits\RequestRetry;
 use Olifanton\Interop\Address;
 use Olifanton\Ton\Exceptions\TransportException;
 
 class Game implements GameInterface
 {
+    use RequestRetry;
+
     protected Address $address;
     protected TonHttpGatewayInterface $tonHttpGateway;
 
@@ -19,19 +22,22 @@ class Game implements GameInterface
 
     /**
      * @throws TransportException
+     * @throws \Exception
      */
     public function getLastNumber(): int
     {
-        // TODO try/catch and retries
-        $response = $this->tonHttpGateway
-            ->getTransport()
-            ->runGetMethod($this->address, 'lastNumber');
+        $response = $this->sendRequestWithRetry(
+            function() {
+                return $this->tonHttpGateway
+                    ->getTransport()
+                    ->runGetMethod($this->address, 'lastNumber');
+            },
+            function($response) {
+                return $response->currentBigInteger()->toInt() === -1;
+            },
+            5
+        );
 
-        $lastNumber = $response->currentBigInteger()->toInt();
-        if (!$lastNumber) {
-            // TODO error
-        }
-
-        return $lastNumber;
+        return $response->currentBigInteger()->toInt();
     }
 }

@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Log;
 
 class BotController extends Controller
 {
-    /**
-     * @throws \Exception
-     */
     public function webhook(Request $request)
     {
         $message = $request->post('message');
@@ -41,8 +38,6 @@ class BotController extends Controller
                 'url' => $sendMessageUrl,
                 'response' => $decodedResponse,
             ]);
-
-            throw new \Exception($errorMsg);
         }
 
         return response()->noContent();

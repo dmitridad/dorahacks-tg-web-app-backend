@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Game extends Model
 {
@@ -38,8 +39,8 @@ class Game extends Model
     {
         return $this->belongsTo(
             Room::class,
-            self::PROP_ROOM_ID,
-            Room::PROP_ROOM_ID
+            Room::PROP_ROOM_ID,
+            self::PROP_ROOM_ID
         );
     }
 
@@ -62,8 +63,13 @@ class Game extends Model
     {
         return $this->hasMany(
             GameRound::class,
-            self::PROP_GAME_ID,
-            GameRound::PROP_GAME_ID
+            GameRound::PROP_GAME_ID,
+            self::PROP_GAME_ID
         );
+    }
+
+    public function currentRound(): HasOne
+    {
+        return $this->rounds()->one()->latestOfMany();
     }
 }
