@@ -9,8 +9,7 @@ class BotController extends Controller
 {
     public function webhook(Request $request)
     {
-        $message = json_decode($request->post('message'), true);
-        $text = $message['text'];
+        $message = $request->post('message');
 
         $botToken = env('TG_BOT_TOKEN');
         $chatId = $message['chat']['id'];
