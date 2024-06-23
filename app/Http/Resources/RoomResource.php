@@ -20,6 +20,8 @@ class RoomResource extends JsonResource
     {
         /* @var User $user */
         $user = Auth::user();
+        $activeGame = $this->resource->activeGame()->first();
+        $usersInGame = $activeGame ? $activeGame->usersCount() : 0;
 
         return [
             'room_id' => $this->resource->room_id,
@@ -27,8 +29,9 @@ class RoomResource extends JsonResource
             'room_capacity' => $this->resource->room_capacity,
             'room_status' => $this->resource->room_status,
             'users_count' => $this->resource->usersCount(),
+            'users_in_game_count' => $usersInGame,
             'auth_user_in_room' => $this->resource->hasUser($user),
-            'game' => $this->resource->activeGame()->first(),
+            'game' => $activeGame,
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
         ];
