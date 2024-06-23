@@ -24,7 +24,7 @@ class BotController extends Controller
                 'inline_keyboard' => [
                     [
                         [
-                            'text' => env('TG_WEB_APP_PLAY_BTN_MSG'),
+                            'text' => env('TG_WEB_APP_PLAY_BTN_TXT'),
                             'web_app' => ['url' => env('TG_WEB_APP_URL')]
                         ],
                     ],
@@ -33,12 +33,13 @@ class BotController extends Controller
         ];
 
         $response = Http::post($sendMessageUrl, $data);
-        $responseJson = $response->json();
-        if (!$responseJson['ok']) {
+        $decodedResponse = $response->json();
+        if (!$decodedResponse['ok']) {
             $errorMsg = 'tg sendMessage error';
             Log::error($errorMsg, [
                 'data' => $data,
                 'url' => $sendMessageUrl,
+                'response' => $decodedResponse,
             ]);
 
             throw new \Exception($errorMsg);
