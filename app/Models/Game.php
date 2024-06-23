@@ -72,4 +72,12 @@ class Game extends Model
     {
         return $this->rounds()->one()->latestOfMany();
     }
+
+    public function hasUser(User $user): bool
+    {
+        return GameUser::query()
+            ->where(GameUser::PROP_GAME_ID, $this->game_id)
+            ->where(GameUser::PROP_USER_ID, $user->user_id)
+            ->exists();
+    }
 }
