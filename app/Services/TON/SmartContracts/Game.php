@@ -35,7 +35,7 @@ class Game implements GameInterface
             function($response) {
                 return $response->currentBigInteger()->toInt() === -1;
             },
-            5
+            8
         );
 
         return $response->currentBigInteger()->toInt();
