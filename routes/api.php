@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BotController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -43,9 +44,12 @@ Route::prefix('games')->middleware(['auth:sanctum'])->group(function () {
     // TODO temporary solution for testing
     Route::delete('/{game_id}/purge', [GameController::class, 'purge'])->name('game.purge');
     Route::get('/{game_id}/rounds', [GameController::class, 'getRounds'])->name('game.get_rounds');
+    Route::post('/{game_id}/answer', [GameController::class, 'answer'])->name('game.new_answer');
     Route::post('/{game_id}/generate-number', [GameController::class, 'generateNumber'])
         ->name('game.generate_number');
 });
 
-// temporary endpoint for testing purposes
+// TODO temporary solution for testing
 Route::delete('/user', [AuthController::class, 'deleteUser'])->name('user.delete');
+
+Route::post('/bot/webhook', [BotController::class, 'webhook'])->name('bot.webhook');
